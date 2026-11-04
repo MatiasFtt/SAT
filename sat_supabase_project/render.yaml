@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: sat-supabase
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: BOOTSTRAP_TOKEN
+        generateValue: true

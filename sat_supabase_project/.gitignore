@@ -16,6 +16,5 @@ __pycache__/
 *.sqlite*
 node_modules/
 **/node_modules/
-.vercel/
 public/
 frontend/dist/

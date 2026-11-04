@@ -3,7 +3,7 @@ import re
 import hmac
 from datetime import datetime, timezone
 from dotenv import load_dotenv
-from flask import Flask, current_app, jsonify, request, session
+from flask import Flask, current_app, jsonify, request, session, send_from_directory
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
@@ -94,13 +94,13 @@ def order_json(o):
             "updated_at":o.updated_at.isoformat() if o.updated_at else None}
 
 def create_app():
-    app=Flask(__name__)
-    is_vercel=os.getenv("VERCEL", "").lower() in {"1", "true"}
+    app=Flask(__name__, static_folder="../public", static_url_path="")
+    is_render=os.getenv("RENDER", "").lower() in {"1", "true"}
     secret_key=os.getenv("SECRET_KEY")
-    if is_vercel and not secret_key:
-        raise RuntimeError("Configura SECRET_KEY en las variables de entorno de Vercel.")
-    if is_vercel and not os.getenv("DATABASE_URL"):
-        raise RuntimeError("Configura DATABASE_URL de Supabase en las variables de entorno de Vercel.")
+    if is_render and not secret_key:
+        raise RuntimeError("Configura SECRET_KEY en las variables de entorno de Render.")
+    if is_render and not os.getenv("DATABASE_URL"):
+        raise RuntimeError("Configura DATABASE_URL de Supabase en las variables de entorno de Render.")
     app.secret_key=secret_key or "local-dev-secret-change-before-sharing"
     url=os.getenv("DATABASE_URL","").strip()
     if url.startswith("postgres://"): url=url.replace("postgres://","postgresql+psycopg://",1)
@@ -117,7 +117,7 @@ def create_app():
         }
     app.config["SESSION_COOKIE_HTTPONLY"] = True
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
-    app.config["SESSION_COOKIE_SECURE"] = is_vercel or os.getenv("SESSION_COOKIE_SECURE", "false").lower() == "true"
+    app.config["SESSION_COOKIE_SECURE"] = is_render or os.getenv("SESSION_COOKIE_SECURE", "false").lower() == "true"
     db.init_app(app)
     configured_origin = os.getenv("FRONTEND_ORIGIN", "http://localhost:5173")
     allowed_origins = list({configured_origin, "http://localhost:5173", "http://127.0.0.1:5173"})
@@ -171,7 +171,7 @@ def create_app():
         active_user=db.session.get(User,session.get("user_id")) if session.get("user_id") else None
         if existing_users and not active_user:
             return jsonify(error="Inicia sesión para que un usuario autorizado pueda crear otra cuenta."),403
-        if not existing_users and os.getenv("VERCEL", "").lower() in {"1", "true"}:
+        if not existing_users and is_render:
             supplied=(data.get("bootstrap_token") or "").strip()
             expected=os.getenv("BOOTSTRAP_TOKEN", "")
             if not expected or not hmac.compare_digest(supplied,expected):
@@ -305,6 +305,10 @@ def create_app():
         rows=AuditLog.query.order_by(AuditLog.created_at.desc()).limit(200).all()
         return jsonify([{"id":x.id,"action":x.action,"entity":x.entity,"entity_id":x.entity_id,
                          "details":x.details,"created_at":x.created_at.isoformat()} for x in rows])
+
+    @app.get("/")
+    def frontend():
+        return send_from_directory(app.static_folder, "index.html")
 
     @app.cli.command("init-db")
     def init_db():

@@ -67,18 +67,12 @@ Si Supabase ya estaba inicializado, detén Flask con Ctrl+C. Desde la carpeta ba
     flask --app app init-db
 
 El comando crea la tabla technicians necesaria para la lista. Luego vuelve a iniciar Flask. Agrega los tecnicos desde la sección Tecnicos; solo los disponibles aparecerán al crear una orden.
-## Publicar en Vercel
+## Publicar en Render
 
-El proyecto se configura como una sola aplicacion Flask + React/Vite en el mismo dominio. Conecta el repositorio Git a Vercel y deja **Root Directory** en la carpeta raiz `sat_supabase_project`. El `vercel.json` define la compilacion y Flask sirve la API bajo `/api`.
+Conecta el repositorio Git a Render y crea un **Blueprint** usando el archivo `render.yaml` dentro de `sat_supabase_project`. Render construira la imagen con Docker: compila React/Vite y sirve el frontend junto con la API Flask en el mismo dominio.
 
-Antes de desplegar, agrega estas variables en Vercel > Project Settings > Environment Variables (Production y Preview):
+Configura `DATABASE_URL` en el servicio con la URI de Supabase. Usa la URI **Transaction pooler** (puerto 6543) y codifica los caracteres reservados de la contrasena. `SECRET_KEY` y `BOOTSTRAP_TOKEN` se generan desde `render.yaml`; conserva el token para crear la primera cuenta al iniciar sesión en la aplicación publicada.
 
-- `DATABASE_URL`: usa la URI **Transaction pooler** de Supabase (puerto 6543), no la conexion directa. Copia la URI desde Supabase > Connect y codifica los caracteres reservados de la contrasena.
-- `SECRET_KEY`: una clave aleatoria larga para firmar las sesiones.
-- `BOOTSTRAP_TOKEN`: otra clave aleatoria que usaras una sola vez al registrar la primera cuenta desde el login publicado.
+No subas archivos `.env` al repositorio. Después del primer registro, las cuentas adicionales solo se pueden crear desde Configuración con una sesión iniciada. Render activa cookies seguras mediante la variable `RENDER`.
 
-No subas archivos `.env` al repositorio. Despues del primer registro, las cuentas adicionales solo se pueden crear desde Configuracion con una sesion iniciada. La variable de entorno `VERCEL` activa cookies seguras y el modo serverless.
-
-La base Supabase debe tener sus tablas creadas; si aun no ejecutaste la inicializacion, usa `flask --app app init-db` localmente apuntando al mismo `DATABASE_URL` antes de publicar.
-
-El plan Hobby de Vercel es gratuito para uso personal y no comercial. Si este sistema se usara en la operacion comercial de un negocio, revisa las condiciones del plan antes de publicarlo.
+La base Supabase debe tener sus tablas creadas. Antes de publicar, ejecuta `flask --app app init-db` localmente apuntando al mismo `DATABASE_URL` si aún no inicializaste la base.
