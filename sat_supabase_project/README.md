@@ -69,7 +69,7 @@ Si Supabase ya estaba inicializado, detén Flask con Ctrl+C. Desde la carpeta ba
 El comando crea la tabla technicians necesaria para la lista. Luego vuelve a iniciar Flask. Agrega los tecnicos desde la sección Tecnicos; solo los disponibles aparecerán al crear una orden.
 ## Publicar en Render
 
-Conecta el repositorio Git a Render y crea un **Blueprint** usando el archivo `render.yaml` dentro de `sat_supabase_project`. Render construira la imagen con Docker: compila React/Vite y sirve el frontend junto con la API Flask en el mismo dominio.
+Conecta el repositorio Git a Render y crea un **Blueprint** usando el archivo `sat_supabase_project/render.yaml`. El servicio usa `sat_supabase_project` como raíz. Render construirá la imagen con Docker: compila React/Vite y sirve el frontend junto con la API Flask en el mismo dominio.
 
 Configura `DATABASE_URL` en el servicio con la URI de Supabase. Usa la URI **Transaction pooler** (puerto 6543) y codifica los caracteres reservados de la contrasena. `SECRET_KEY` y `BOOTSTRAP_TOKEN` se generan desde `render.yaml`; conserva el token para crear la primera cuenta al iniciar sesión en la aplicación publicada.
 

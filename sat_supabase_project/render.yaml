@@ -2,6 +2,7 @@ services:
   - type: web
     name: sat-supabase
     runtime: docker
+    rootDir: sat_supabase_project
     dockerfilePath: ./Dockerfile
     dockerContext: .
     healthCheckPath: /api/health
