@@ -2,9 +2,8 @@ services:
   - type: web
     name: sat-supabase
     runtime: docker
-    rootDir: sat_supabase_project
-    dockerfilePath: ./Dockerfile
-    dockerContext: .
+    dockerfilePath: ./sat_supabase_project/Dockerfile
+    dockerContext: ./sat_supabase_project
     healthCheckPath: /api/health
     envVars:
       - key: SECRET_KEY
